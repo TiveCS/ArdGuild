@@ -1,0 +1,13 @@
+name: ArdGuild
+version: 1.0
+author: TiveCS
+main: team.creativecode.ardguild.Main
+commands:
+  ardguildchat:
+      aliases: [gchat, guildc, agc, guildchat]
+      description: Ard Guild Chat Command
+      permission: ardguild.command
+  ardguild:
+    aliases: [guild, g, ag, adg, ardg]
+    description: Ard Guild Main Command
+    permission: ardguild.command

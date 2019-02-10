@@ -1,0 +1,64 @@
+# Do not touch
+file-version: 1.0
+
+#Configure your message here
+help:
+  info:
+    - '&8- &6/%label% &einfo &7<Guild>'
+  create:
+    - '&8- &6/%label% &ecreate &7<Guild>'
+  disband:
+    - '&8- &6/%label% &edisband'
+  join:
+    - '&8- &6/%label% &ejoin &7<Guild>'
+  list:
+    - '&8- &6/%label% &elist'
+  leave:
+    - '&8- &6/%label% &eleave &7<Guild>'
+  kick:
+    - '&8- &6/%label% &ekick &7<Player>'
+  invite:
+    - '&8- &6/%label% &einvite &7<Player>'
+  invite-list:
+    - '&8- &6/%label% &einvitelist'
+  sethome:
+    - '&8- &6/%label% &esethome &7[Name]'
+  home:
+    - '&8- &6/%label% &ehome &7[Name]'
+  leader:
+    - '&8- &6/%label% &eleader &7<Player>'
+
+guild:
+  chat:
+    - '%prefix% &eYour guild chat mode has been &aEnabled'
+    - '%prefix% &eYour guild chat mode has been &cDisabled'
+  create:
+    - '%prefix% &eGuild has been created named &a%guild%'
+  create-failed-has-guild:
+    - '%prefix% &cYou are belong to a guild!'
+  create-failed-overlength:
+    - '%prefix% &cGuild name length is too long!'
+  disband:
+    - '%prefix% &eGuild has been disbanded'
+  invite:
+    - '%prefix% &b%player% &ehave been invited to &a%guild%'
+  invite-revoke:
+    - '%prefix% &eInvitation of &b%player% &ehas been revoked'
+  join:
+    - '%prefix% &b%player% &ehas joined guild &a%guild%'
+  join-failed-not-invited:
+      - '%prefix% &cYou are not invited to this guild'
+  join-failed-has-guild:
+      - '%prefix% &cYou are already has a guild!'
+  leave:
+    - '%prefix% &b%player% &eleaved the guild...'
+  kick:
+    - '%prefix% &b%player% &ehas been kicked from guild'
+
+alert:
+  no-permission:
+    - '%prefix% &cInsufficient Permission!'
+  not-found:
+    - '%prefix% &cArgument not found!'
+  action-failed:
+    - '%prefix% &cAction failed!'
