@@ -14,7 +14,7 @@ help:
   list:
     - '&8- &6/%label% &elist'
   leave:
-    - '&8- &6/%label% &eleave &7<Guild>'
+    - '&8- &6/%label% &eleave'
   kick:
     - '&8- &6/%label% &ekick &7<Player>'
   invite:
@@ -23,37 +23,58 @@ help:
     - '&8- &6/%label% &einvitelist'
   sethome:
     - '&8- &6/%label% &esethome &7[Name]'
+  delhome:
+    - '&8- &6/%label% &edelhome &7[Name]'
   home:
     - '&8- &6/%label% &ehome &7[Name]'
   leader:
     - '&8- &6/%label% &eleader &7<Player>'
+  war:
+    - '&8- &6/%label% &ewar &7<Guild>'
+  ally:
+    - '&8- &6/%label% &eally &7<Guild>'
+  enemy:
+    - '&8- &6/%label% &eenemy &7<Guild>'
+  shop:
+    - '&8- &6/%label% &eshop'
+  storage:
+    - '&8- &6/%label% &estorage'
+  friendlyfire:
+    - '&8- &6/%label% &efriendlyfire'
+
 
 guild:
   chat:
-    - '%prefix% &eYour guild chat mode has been &aEnabled'
-    - '%prefix% &eYour guild chat mode has been &cDisabled'
+    - '&8[&a%guild%&8] &eYour guild chat mode has been &aEnabled'
+    - '&8[&a%guild%&8] &eYour guild chat mode has been &cDisabled'
   create:
-    - '%prefix% &eGuild has been created named &a%guild%'
+    - '&8[&a%guild%&8] &eGuild has been created named &a%guild%'
   create-failed-has-guild:
-    - '%prefix% &cYou are belong to a guild!'
+    - '&8[&a%guild%&8] &cYou are belong to a guild!'
   create-failed-overlength:
-    - '%prefix% &cGuild name length is too long!'
+    - '&8[&a%guild%&8] &cGuild name length is too long!'
   disband:
-    - '%prefix% &eGuild has been disbanded'
+    - '&8[&a%guild%&8] &eGuild has been disbanded'
   invite:
-    - '%prefix% &b%player% &ehave been invited to &a%guild%'
+    - '&8[&a%guild%&8] &b%player% &ehave been invited to &a%guild%'
   invite-revoke:
-    - '%prefix% &eInvitation of &b%player% &ehas been revoked'
+    - '&8[&a%guild%&8] &eInvitation of &b%player% &ehas been revoked'
   join:
-    - '%prefix% &b%player% &ehas joined guild &a%guild%'
+    - '&8[&a%guild%&8] &b%player% &ehas joined guild &a%guild%'
   join-failed-not-invited:
-      - '%prefix% &cYou are not invited to this guild'
+      - '&8[&a%guild%&8] &cYou are not invited to this guild'
   join-failed-has-guild:
-      - '%prefix% &cYou are already has a guild!'
+      - '&8[&a%guild%&8] &cYou are already has a guild!'
   leave:
-    - '%prefix% &b%player% &eleaved the guild...'
+    - '&8[&a%guild%&8] &b%player% &eleaved the guild...'
   kick:
-    - '%prefix% &b%player% &ehas been kicked from guild'
+    - '&8[&a%guild%&8] &b%player% &ewas kicked by &6%kicker%'
+  home:
+    - '&8[&a%guild%&8] &b%player% &eteleported to home &a%home%'
+  sethome:
+    - '&8[&a%guild%&8] &b%home% &ehome has been set!'
+  delhome:
+    - '&8[&a%guild%&8] &b%home% &chome has been deleted!!'
 
 alert:
   no-permission:

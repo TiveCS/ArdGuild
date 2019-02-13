@@ -63,6 +63,22 @@ public class ArdGuildCmd implements CommandExecutor {
                 msg.add(Main.language.getMessages().get("help.home").get(0));
                 msg.add(Main.language.getMessages().get("help.invite-list").get(0));
                 break;
+            case 3:
+                msg.add(Main.language.getMessages().get("help.war").get(0));
+                msg.add(Main.language.getMessages().get("help.enemy").get(0));
+                msg.add(Main.language.getMessages().get("help.ally").get(0));
+                msg.add(Main.language.getMessages().get("help.shop").get(0));
+                msg.add(Main.language.getMessages().get("help.storage").get(0));
+                msg.add(Main.language.getMessages().get("help.friendlyfire").get(0));
+                break;
+            case 4:
+                msg.add(Main.language.getMessages().get("help.delhome").get(0));
+                /*msg.add(Main.language.getMessages().get("help.enemy").get(0));
+                msg.add(Main.language.getMessages().get("help.ally").get(0));
+                msg.add(Main.language.getMessages().get("help.shop").get(0));
+                msg.add(Main.language.getMessages().get("help.storage").get(0));
+                msg.add(Main.language.getMessages().get("help.friendlyfire").get(0));*/
+                break;
         }
         msg = DataConverter.colored(msg);
         for (int i = 0; i < msg.size(); i++) {
@@ -73,6 +89,7 @@ public class ArdGuildCmd implements CommandExecutor {
         p.sendMessage(ChatColor.translateAlternateColorCodes('&', " "));
     }
 
+    @Deprecated
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
 
@@ -80,6 +97,7 @@ public class ArdGuildCmd implements CommandExecutor {
             if (commandSender instanceof Player) {
                 Player p = (Player) commandSender;
                 if (p.hasPermission("ardguild.command")){
+                    Guild g = new Guild(p);
                     if (args.length == 1 && (args[0].equalsIgnoreCase("?") || args[0].equalsIgnoreCase("help"))) {
                         help(p, 1, s);
                         return true;
@@ -91,8 +109,35 @@ public class ArdGuildCmd implements CommandExecutor {
                         }
                         return true;
                     } else if (args.length == 1) {
+                        if (args[0].equalsIgnoreCase("friendlyfire") || args[0].equalsIgnoreCase("ff")){
+                            if (g.hasLeader() && g.getLeader().equals(p)){
+                                g.switchFriendlyfire();
+                            }
+                            return true;
+                        }
+                        if (args[0].equalsIgnoreCase("home")){
+                            if (g.hasLeader() && g.getMembers().contains(p.getUniqueId().toString())){
+                                g.home(p, "default");
+                            }else{
+                                Main.language.sendMessage(p, Main.placeholder.useAsList(Main.language.getMessages().get("alert.action-failed")));
+                            }
+                            return true;
+                        }
+                        if (args[0].equalsIgnoreCase("sethome")){
+                            if (g.getLeader().equals(p)){
+                                g.sethome(p, "default");
+                            }else{
+                                Main.language.sendMessage(p, Main.placeholder.useAsList(Main.language.getMessages().get("alert.action-failed")));
+                            }
+                            return true;
+                        }
+                        if (args[0].equalsIgnoreCase("leave") || args[0].equalsIgnoreCase("quit")){
+                            if (g.hasLeader() && !g.getLeader().equals(p)){
+                                g.leave(p);
+                            }
+                            return true;
+                        }
                         if (args[0].equalsIgnoreCase("disband")) {
-                            Guild g = new Guild(p);
                             if (g.getLeader().equals(p)) {
                                 g.disband();
                             } else {
@@ -104,14 +149,13 @@ public class ArdGuildCmd implements CommandExecutor {
                             List<Guild> gd = guildlist(1);
                             p.sendMessage(ChatColor.translateAlternateColorCodes('&', "&6Guild List &8(&c" + gd.size() + " Guilds&8) &bPage 1"));
                             p.sendMessage(" ");
-                            for (Guild g : gd){
-                                p.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7- &e" + g.getName() + " &a" + g.getMembers().size() + " Member(s)"));
+                            for (Guild gt : gd){
+                                p.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7- &e" + gt.getName() + " &8(&6" + g.getLeader().getName() + "&8) &8[&a" + g.getMembers().size() + " Member(s)&8]"));
                             }
                             p.sendMessage(" ");
                             return true;
                         }
                         if (args[0].equalsIgnoreCase("info")) {
-                            Guild g = new Guild(p);
                             String name = "";
                             if (!g.hasLeader()) {
                                 Main.language.sendMessage(p, Main.placeholder.useAsList(Main.language.getMessages().get("alert.action-failed")));
@@ -138,12 +182,56 @@ public class ArdGuildCmd implements CommandExecutor {
                             return true;
                         }
                     } else if (args.length == 2) {
+                        if (args[0].equalsIgnoreCase("delhome") || args[0].equalsIgnoreCase("deletehome")){
+                            if (g.hasLeader() && g.getLeader().equals(p)){
+                                g.delhome(p, args[1]);
+                            }else{
+                                Main.language.sendMessage(p, Main.placeholder.useAsList(Main.language.getMessages().get("alert.action-failed")));
+                            }
+                            return true;
+                        }
+                        if (args[0].equalsIgnoreCase("home")){
+                            if (g.hasLeader() && g.getMembers().contains(p.getUniqueId().toString())){
+                                g.home(p, args[1]);
+                            }else{
+                                Main.language.sendMessage(p, Main.placeholder.useAsList(Main.language.getMessages().get("alert.action-failed")));
+                            }
+                            return true;
+                        }
+                        if (args[0].equalsIgnoreCase("sethome")){
+                            if (g.getLeader().equals(p)){
+                                g.sethome(p, args[1]);
+                            }else{
+                                Main.language.sendMessage(p, Main.placeholder.useAsList(Main.language.getMessages().get("alert.action-failed")));
+                            }
+                            return true;
+                        }
+                        if (args[0].equalsIgnoreCase("kick")){
+                            if (g.getLeader().equals(p)) {
+                                OfflinePlayer target = null;
+                                try {
+                                    if (target.equals(null)) {
+                                        Main.language.sendMessage(p, Main.placeholder.useAsList(Main.language.getMessages().get("alert.not-found")));
+                                        return true;
+                                    }
+                                } catch (Exception e) {
+                                    try {
+                                        target = Bukkit.getOfflinePlayer(args[1]);
+                                        if (target.equals(null)){return true;}
+                                    }catch(Exception ep) {
+                                        Main.language.sendMessage(p, Main.placeholder.useAsList(Main.language.getMessages().get("alert.not-found")));
+                                        return true;
+                                    }
+                                }
+                                g.kick(p, target);
+                            }
+                            return true;
+                        }
                         if (args[0].equalsIgnoreCase("join")) {
                             if (!Guild.guilds.containsKey(args[1])) {
                                 Main.language.sendMessage(p, Main.placeholder.useAsList(Main.language.getMessages().get("alert.action-failed")));
                                 return true;
                             }
-                            Guild g = new Guild(p);
                             if (g.getMembers().contains(p.getUniqueId().toString())) {
                                 Main.language.sendMessage(p, Main.placeholder.useAsList(Main.language.getMessages().get("guild.join-failed-has-guild")));
                             } else {
@@ -152,7 +240,11 @@ public class ArdGuildCmd implements CommandExecutor {
                             }
                             return true;
                         }
-                        if (args[0].equalsIgnoreCase("create")) {
+                        if (args[0].equalsIgnoreCase("create") || args[0].equalsIgnoreCase("new")) {
+                            if (Guild.guilds.containsKey(args[1])){
+                                Main.language.sendMessage(p, Main.placeholder.useAsList(Main.language.getMessages().get("alert.action-failed")));
+                                return true;
+                            }
                             if (new Guild(p).hasLeader()) {
                                 Main.language.sendMessage(p, Main.placeholder.useAsList(Main.language.getMessages().get("guild.create-failed-has-guild")));
                                 return true;
@@ -164,8 +256,7 @@ public class ArdGuildCmd implements CommandExecutor {
                             new Guild(p, args[1]);
                             return true;
                         }
-                        if (args[0].equalsIgnoreCase("invite")) {
-                            Guild g = new Guild(p);
+                        if (args[0].equalsIgnoreCase("invite") || args[0].equalsIgnoreCase("inv")) {
                             OfflinePlayer target = null;
                             if (g.getLeader().getPlayer().equals(p)) {
                                 target = DataGetter.getOnlinePlayerFromText(args[1]);
@@ -175,8 +266,13 @@ public class ArdGuildCmd implements CommandExecutor {
                                         return true;
                                     }
                                 } catch (Exception e) {
-                                    Main.language.sendMessage(p, Main.placeholder.useAsList(Main.language.getMessages().get("alert.not-found")));
-                                    return true;
+                                    try {
+                                        target = Bukkit.getOfflinePlayer(args[1]);
+                                        if (target.equals(null)){return true;}
+                                    }catch(Exception ep) {
+                                        Main.language.sendMessage(p, Main.placeholder.useAsList(Main.language.getMessages().get("alert.not-found")));
+                                        return true;
+                                    }
                                 }
                                 g.invite(target);
                                 return true;

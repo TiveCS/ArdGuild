@@ -1,7 +1,7 @@
 package team.creativecode.ardguild.manager;
 
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
+import com.sun.deploy.config.Config;
+import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -20,6 +20,10 @@ import java.util.UUID;
 
 public class Guild {
 
+    public enum GuildRank{
+        LEADER;
+    }
+
     public static HashMap<String, Guild> guilds = new HashMap<String, Guild>();
     public static Main plugin = Main.getPlugin(Main.class);
     public static File folder = new File(plugin.getDataFolder() + "/Guild");
@@ -32,7 +36,7 @@ public class Guild {
     private OfflinePlayer leader;
     private File file;
     private FileConfiguration configuration;
-    private boolean hasLeader = false;
+    private boolean hasLeader = false, friendlyfire = false;
 
     public static void loadGuilds(){
         guilds.clear();
@@ -57,6 +61,7 @@ public class Guild {
             this.leader = executor;
             this.hasLeader = true;
             this.members = new ArrayList<String>();
+            this.friendlyfire = false;
             members.add(executor.getUniqueId().toString());
 
             file = new File(plugin.getDataFolder() + "/Guild", name + ".yml");
@@ -73,6 +78,7 @@ public class Guild {
             ConfigManager.init(file, "members", members);
 
             loadDefaultData();
+            plc.clearData();
             placeholder();
             guilds.put(this.name, this);
             if (executor.isOnline()) {
@@ -97,6 +103,8 @@ public class Guild {
                 this.leader = g.getLeader();
                 this.name = g.getName();
                 this.hasLeader = true;
+                this.friendlyfire = g.getFriendlyFire();
+                plc.clearData();
                 placeholder();
                 break;
             }else{
@@ -114,18 +122,47 @@ public class Guild {
             this.inviteList = new ArrayList<String>(this.configuration.getStringList("invite-list"));
             this.chat = new ArrayList<String>(this.configuration.getStringList("chat"));
             this.members = this.configuration.getStringList("members");
+            this.friendlyfire = this.configuration.getBoolean("info.friendlyfire");
             if (ConfigManager.contains(file, "leader")) {
                 this.leader = Bukkit.getOfflinePlayer(UUID.fromString(ConfigManager.get(getFile(), "leader").toString()));
                 this.hasLeader = true;
             }
+            plc.clearData();
             placeholder();
         }
     }
 
+    public void setInfoValue(String path, Object obj){
+        ConfigManager.input(getFile(), "info." + path, obj);
+    }
+
+    public void setKill(int num){
+        ConfigManager.input(getFile(), "info.kills", num);
+    }
+
+    public void setDeaths(int num){
+        ConfigManager.input(getFile(), "info.deaths", num);
+    }
+
+    public void setExp(int num){
+        ConfigManager.input(getFile(), "info.exp", num);
+    }
+
+    public void setLevel(int num){
+        ConfigManager.input(getFile(), "info.level", num);
+    }
+
+    public void setPoint(int num){
+        ConfigManager.input(getFile(), "info.point", num);
+    }
+
+    public void switchFriendlyfire(){
+        plc.inputData("friendlyfire", this.friendlyfire ? ChatColor.GREEN + "" + this.friendlyfire : ChatColor.RED + "" + !this.friendlyfire);
+        ConfigManager.input(getFile(), "info.friendlyfire", !this.friendlyfire);
+        broadcast(Main.language.getMessages().get("guild.friendlyfire"));
+    }
+
     public boolean chat(Player p){
-        System.out.println(this.chat);
-        System.out.println( " ");
-        System.out.println(getPlayerInChat());
         if (getPlayerInChat().contains(p.getUniqueId().toString())){
             this.chat.remove(p.getUniqueId().toString());
             ConfigManager.input(getFile(), "chat", getPlayerInChat());
@@ -176,6 +213,56 @@ public class Guild {
         loadGuilds();
     }
 
+    public void leave(Player target){
+        plc.inputData("player", target.getName());
+        plc.inputData("target", target.getName());
+        plc.inputData("uuid", target.getUniqueId().toString());
+        placeholder();
+        List<String> msg = new ArrayList<String>();
+
+        if (!getMembers().contains(target.getUniqueId().toString())){
+            msg = Main.language.getMessages().get("guild.action-failed");
+        }else {
+            this.members.remove(target.getUniqueId().toString());
+            msg = Main.language.getMessages().get("guild.leave");
+            broadcast(msg);
+
+            ConfigManager.input(this.file, "members", this.members);
+            loadGuilds();
+        }
+
+        for (String ms : msg){
+            target.getPlayer().sendMessage(plc.use(ms));
+        }
+    }
+
+    public void kick(Player kicker, OfflinePlayer target){
+        plc.inputData("kicker", kicker.getName());
+        plc.inputData("player", target.getName());
+        plc.inputData("target", target.getName());
+        plc.inputData("uuid", target.getUniqueId().toString());
+        placeholder();
+        List<String> msg = new ArrayList<String>();
+
+        if (!getMembers().contains(target.getUniqueId().toString())){
+            msg = Main.language.getMessages().get("guild.action-failed");
+        }else {
+            this.members.remove(target.getUniqueId().toString());
+            msg = Main.language.getMessages().get("guild.kick");
+            broadcast(msg);
+
+            ConfigManager.input(this.file, "members", this.members);
+            loadGuilds();
+        }
+
+        if (target.isOnline()) {
+            for (String ms : msg) {
+                target.getPlayer().sendMessage(plc.use(ms));
+            }
+        }
+
+    }
+
     public void invite(OfflinePlayer target){
         plc.inputData("player", target.getName());
         plc.inputData("target", target.getName());
@@ -193,11 +280,84 @@ public class Guild {
 
         broadcast(msg);
 
-        for (String ms : msg){
-            target.getPlayer().sendMessage(plc.use(ms));
+        if (target.isOnline()) {
+            for (String ms : msg) {
+                target.getPlayer().sendMessage(plc.use(ms));
+            }
         }
         ConfigManager.input(this.file, "invite-list", this.inviteList);
         loadGuilds();
+    }
+
+    public void sethome(Player executor, String name){
+        String path = "homes." + name;
+        ConfigManager.input(getFile(), path + ".x", executor.getLocation().getX());
+        ConfigManager.input(getFile(), path + ".y", executor.getLocation().getY());
+        ConfigManager.input(getFile(), path + ".z", executor.getLocation().getZ());
+
+        ConfigManager.input(getFile(), path + ".yaw", executor.getLocation().getYaw());
+        ConfigManager.input(getFile(), path + ".pitch", executor.getLocation().getPitch());
+
+        ConfigManager.input(getFile(), path + ".world", executor.getLocation().getWorld().getName());
+
+        plc.inputData("player", executor.getName());
+        plc.inputData("home", name);
+        plc.inputData("x", executor.getLocation().getX() + "");
+        plc.inputData("y", executor.getLocation().getY() + "");
+        plc.inputData("z", executor.getLocation().getZ() + "");
+        plc.inputData("world", executor.getLocation().getWorld().getName());
+
+        placeholder();
+        broadcast(plc.useAsList(Main.language.getMessages().get("guild.sethome")));
+    }
+
+    public void home(Player executor, String name){
+        String path = "homes." + name;
+        double x,y,z;
+        float yaw, pitch;
+        World world;
+
+        try {
+            x = getConfiguration().getDouble(path + ".x");
+            y = getConfiguration().getDouble(path + ".y");
+            z = getConfiguration().getDouble(path + ".z");
+            yaw = (float) getConfiguration().getDouble(path + ".yaw");
+            pitch = (float) getConfiguration().getDouble(path + ".pitch");
+
+            world = Bukkit.getWorld(getConfiguration().getString(path + ".world"));
+            executor.teleport(new Location(world, x, y, z, yaw, pitch));
+
+            plc.inputData("player", executor.getName());
+            plc.inputData("home", name);
+            plc.inputData("x", x + "");
+            plc.inputData("y", y + "");
+            plc.inputData("z", z + "");
+            plc.inputData("world", world.getName());
+            placeholder();
+            broadcast(plc.useAsList(Main.language.getMessages().get("guild.home")));
+        }catch(Exception e){
+            Main.language.sendMessage(executor, plc.useAsList(Main.language.getMessages().get("alert.action-failed")));
+            e.printStackTrace();
+        }
+    }
+
+    public void delhome(Player executor, String name){
+        plc.inputData("player", executor.getName());
+        plc.inputData("home", name);
+        placeholder();
+        if (delhome(name)){
+            broadcast(Main.language.getMessages().get("guild.delhome"));
+        }else{
+            Main.language.sendMessage(executor, plc.useAsList(Main.language.getMessages().get("alert.action-failed")));
+        }
+    }
+
+    public boolean delhome(String name){
+        if (getHomeList().contains(name)){
+            ConfigManager.input(getFile(), "homes." + name, null);
+            return true;
+        }
+        return false;
     }
 
     public void loadDefaultData(){
@@ -207,6 +367,7 @@ public class Guild {
         ConfigManager.init(file, "info.point", 0);
         ConfigManager.init(file, "info.kills", 0);
         ConfigManager.init(file, "info.deaths", 0);
+        ConfigManager.init(file, "info.friendlyfire", false);
     }
 
     public void broadcast(List<String> msg){
@@ -265,6 +426,10 @@ public class Guild {
         return Integer.parseInt(ConfigManager.get(getFile(), "info.level").toString());
     }
 
+    public boolean getFriendlyFire(){
+        return this.friendlyfire;
+    }
+
     public int getKills(){
         return Integer.parseInt(ConfigManager.get(getFile(), "info.kills").toString());
     }
@@ -279,6 +444,10 @@ public class Guild {
 
     public List<String> getPlayerInChat(){
         return this.chat;
+    }
+
+    public List<String> getHomeList(){
+        return new ArrayList<String>(getConfiguration().getConfigurationSection("homes").getKeys(false));
     }
 
     public void placeholder() {

@@ -1,8 +1,10 @@
 package team.creativecode.ardguild.events;
 
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import team.creativecode.ardguild.Main;
 import team.creativecode.ardguild.manager.Guild;
@@ -25,6 +27,15 @@ public class GeneralHandler implements Listener {
                 g.broadcast(send);
             }
         }
+    }
+
+    @EventHandler
+    public void death(PlayerDeathEvent event){
+        Player victim = event.getEntity();
+        Player attacker = victim.getKiller();
+
+        Guild gv = new Guild(victim), ga = new Guild(attacker);
+
     }
 
 }

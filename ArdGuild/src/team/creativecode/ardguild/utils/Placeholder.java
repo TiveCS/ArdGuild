@@ -40,6 +40,15 @@ public class Placeholder {
 			replacer.put(key, map.get(key));
 		}
 	}
+
+	public HashMap<String, String> getReplacer(){
+		return this.replacer;
+	}
+
+	public void clearData(){
+		this.replacer.clear();
+		loadDefaultData();
+	}
 	
 	private void loadDefaultData() {
 		replacer.put("prefix", ChatColor.translateAlternateColorCodes('&',plugin.getConfig().getString("prefix")));

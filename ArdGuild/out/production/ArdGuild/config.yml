@@ -2,4 +2,10 @@ language: 'en-US.yml'
 prefix: '&6&lAGuild &8&l>>'
 guild:
   max-name-length: 5
+  max-member-per-level: 3
+  max-home: 2
   guild-chat-format: '&8[&a%guild%&8] &f%player% &8: &7%message%'
+  sethome-disabled-world:
+    - 'resource'
+    - 'world_nether'
+    - 'world_the_end'
