@@ -50,7 +50,12 @@ public class Language {
 		config = YamlConfiguration.loadConfiguration(file);
 		loadData();
 	}
-	
+
+	public List<String> flush(String path){
+		msg.put(path, DataConverter.colored(config.getStringList(path)));
+		return DataConverter.colored(config.getStringList(path));
+	}
+
 	public void loadData() {
         List<String> l = new ArrayList<String>(config.getRoot().getKeys(false));
         l.remove("file-version");

@@ -1,5 +1,7 @@
 package team.creativecode.ardguild;
 
+import net.milkbowl.vault.economy.Economy;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import team.creativecode.ardguild.cmds.ArdGuildChatCmd;
 import team.creativecode.ardguild.cmds.ArdGuildCmd;
@@ -9,10 +11,13 @@ import team.creativecode.ardguild.utils.ConfigManager;
 import team.creativecode.ardguild.utils.Language;
 import team.creativecode.ardguild.utils.Placeholder;
 
+import java.util.Random;
+
 public class Main extends JavaPlugin {
 
-    public static Language language;
-    public static Placeholder placeholder;
+    public static Economy economy = null;
+    public static Language language = null;
+    public static Placeholder placeholder = null;
 
     @Override
     public void onEnable(){
@@ -20,7 +25,29 @@ public class Main extends JavaPlugin {
         loadCmds();
         loadEvents();
 
+        if (getConfig().getBoolean("hook.vault")) {
+            if (setupEconomy()) {
+                getServer().getConsoleSender().sendMessage("[" + getDescription().getName() + "] Vault has been hooked");
+            }
+        }
         Guild.loadGuilds();
+        if (getConfig().getBoolean("hook.vault")) {
+            placeholder.inputData("vault-money", getConfig().getDouble("guild.vault-require") + "");
+        }
+    }
+
+    public static boolean chance(double ch){
+        return ch >= new Random().nextDouble() * 100;
+    }
+
+    private boolean setupEconomy()
+    {
+        RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
+        if (economyProvider != null) {
+            economy = economyProvider.getProvider();
+        }
+
+        return (economy != null);
     }
 
     private void loadEvents() {

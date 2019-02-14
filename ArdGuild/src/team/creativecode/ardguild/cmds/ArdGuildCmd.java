@@ -109,6 +109,10 @@ public class ArdGuildCmd implements CommandExecutor {
                         }
                         return true;
                     } else if (args.length == 1) {
+                        if (args[0].equalsIgnoreCase("invitelist")) {
+
+                            return true;
+                        }
                         if (args[0].equalsIgnoreCase("friendlyfire") || args[0].equalsIgnoreCase("ff")){
                             if (g.hasLeader() && g.getLeader().equals(p)){
                                 g.switchFriendlyfire();
@@ -138,10 +142,14 @@ public class ArdGuildCmd implements CommandExecutor {
                             return true;
                         }
                         if (args[0].equalsIgnoreCase("disband")) {
-                            if (g.getLeader().equals(p)) {
-                                g.disband();
-                            } else {
-                                Main.language.sendMessage(p, Main.placeholder.useAsList(Main.language.getMessages().get("alert.action-failed")));
+                            if (g.getMembers().contains(p.getUniqueId().toString())) {
+                                if (g.getLeader().equals(p)) {
+                                    g.disband();
+                                } else {
+                                    Main.language.sendMessage(p, Main.placeholder.useAsList(Main.language.getMessages().get("alert.no-permission")));
+                                }
+                            }else{
+                                Main.language.sendMessage(p, Main.placeholder.useAsList(Main.language.getMessages().get("alert.not-belong-to-guild")));
                             }
                             return true;
                         }
@@ -253,7 +261,20 @@ public class ArdGuildCmd implements CommandExecutor {
                                 Main.language.sendMessage(p, Main.placeholder.useAsList(Main.language.getMessages().get("guild.create-failed-overlength")));
                                 return true;
                             }
-                            new Guild(p, args[1]);
+                            double vault = plugin.getConfig().getDouble("guild.vault-require");
+                            if ((plugin.getConfig().getBoolean("hook.vault"))){
+                                if (Main.economy.getBalance(p) >= vault) {
+                                    Main.economy.withdrawPlayer(p, vault);
+                                    Main.placeholder.inputData("money", vault + "");
+                                    Main.language.sendMessage(p, Main.placeholder.useAsList(Main.language.getMessages().get("alert.vault-take")));
+                                    new Guild(p, args[1]);
+
+                                }else{
+                                    Main.language.sendMessage(p, Main.placeholder.useAsList(Main.language.getMessages().get("alert.vault-not-enough")));
+                                }
+                            }else{
+                                new Guild(p, args[1]);
+                            }
                             return true;
                         }
                         if (args[0].equalsIgnoreCase("invite") || args[0].equalsIgnoreCase("inv")) {

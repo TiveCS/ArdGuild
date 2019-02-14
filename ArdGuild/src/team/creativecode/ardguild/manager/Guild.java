@@ -13,10 +13,7 @@ import team.creativecode.ardguild.utils.Placeholder;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class Guild {
 
@@ -37,6 +34,10 @@ public class Guild {
     private File file;
     private FileConfiguration configuration;
     private boolean hasLeader = false, friendlyfire = false;
+
+    public static void loadGuild(Guild guild){
+        guilds.put(guild.getName(), guild);
+    }
 
     public static void loadGuilds(){
         guilds.clear();
@@ -106,6 +107,7 @@ public class Guild {
                 this.friendlyfire = g.getFriendlyFire();
                 plc.clearData();
                 placeholder();
+                loadDefaultData();
                 break;
             }else{
                 this.hasLeader = false;
@@ -129,6 +131,7 @@ public class Guild {
             }
             plc.clearData();
             placeholder();
+            loadDefaultData();
         }
     }
 
@@ -153,13 +156,23 @@ public class Guild {
     }
 
     public void setPoint(int num){
-        ConfigManager.input(getFile(), "info.point", num);
+        if (num != 0) {
+            ConfigManager.input(getFile(), "info.point", num);
+            plc.inputData("point", (num < 0 ? ChatColor.RED + "-" + num : ChatColor.GREEN + "+" + num));
+            broadcast(Main.language.getMessages().get("guild.point-add"));
+        }
+    }
+
+    public void setMobKill(int num){
+        ConfigManager.input(getFile(), "info.mobkill", num);
     }
 
     public void switchFriendlyfire(){
-        plc.inputData("friendlyfire", this.friendlyfire ? ChatColor.GREEN + "" + this.friendlyfire : ChatColor.RED + "" + !this.friendlyfire);
-        ConfigManager.input(getFile(), "info.friendlyfire", !this.friendlyfire);
+        this.friendlyfire = !this.friendlyfire;
+        plc.inputData("friendlyfire", this.friendlyfire == false ? ChatColor.GREEN + "Disabled" : ChatColor.RED + "Enabled");
+        ConfigManager.input(getFile(), "info.friendlyfire", this.friendlyfire);
         broadcast(Main.language.getMessages().get("guild.friendlyfire"));
+        loadGuilds();
     }
 
     public boolean chat(Player p){
@@ -264,6 +277,7 @@ public class Guild {
     }
 
     public void invite(OfflinePlayer target){
+        plc.clearData();
         plc.inputData("player", target.getName());
         plc.inputData("target", target.getName());
         plc.inputData("uuid", target.getUniqueId().toString());
@@ -290,25 +304,33 @@ public class Guild {
     }
 
     public void sethome(Player executor, String name){
-        String path = "homes." + name;
-        ConfigManager.input(getFile(), path + ".x", executor.getLocation().getX());
-        ConfigManager.input(getFile(), path + ".y", executor.getLocation().getY());
-        ConfigManager.input(getFile(), path + ".z", executor.getLocation().getZ());
-
-        ConfigManager.input(getFile(), path + ".yaw", executor.getLocation().getYaw());
-        ConfigManager.input(getFile(), path + ".pitch", executor.getLocation().getPitch());
-
-        ConfigManager.input(getFile(), path + ".world", executor.getLocation().getWorld().getName());
-
-        plc.inputData("player", executor.getName());
-        plc.inputData("home", name);
-        plc.inputData("x", executor.getLocation().getX() + "");
-        plc.inputData("y", executor.getLocation().getY() + "");
-        plc.inputData("z", executor.getLocation().getZ() + "");
-        plc.inputData("world", executor.getLocation().getWorld().getName());
-
+        plc.clearData();
         placeholder();
-        broadcast(plc.useAsList(Main.language.getMessages().get("guild.sethome")));
+        if (plugin.getConfig().getStringList("guild.sethome-disabled-world").contains(executor.getWorld().getName())){
+            Main.language.sendMessage(executor, Main.placeholder.useAsList(Main.language.getMessages().get("alert.unpermitted-world")));
+        }else {
+            String path = "homes." + name;
+            ConfigManager.input(getFile(), path + ".x", executor.getLocation().getX());
+            ConfigManager.input(getFile(), path + ".y", executor.getLocation().getY());
+            ConfigManager.input(getFile(), path + ".z", executor.getLocation().getZ());
+
+            ConfigManager.input(getFile(), path + ".yaw", executor.getLocation().getYaw());
+            ConfigManager.input(getFile(), path + ".pitch", executor.getLocation().getPitch());
+
+            ConfigManager.input(getFile(), path + ".world", executor.getLocation().getWorld().getName());
+
+            plc.inputData("player", executor.getName());
+            plc.inputData("home", name);
+            plc.inputData("x", executor.getLocation().getX() + "");
+            plc.inputData("y", executor.getLocation().getY() + "");
+            plc.inputData("z", executor.getLocation().getZ() + "");
+            plc.inputData("world", executor.getLocation().getWorld().getName());
+
+            placeholder();
+            broadcast(Main.language.getMessages().get("guild.sethome"));
+            loadGuilds();
+            Main.language.flush("guild.sethome");
+        }
     }
 
     public void home(Player executor, String name){
@@ -317,6 +339,11 @@ public class Guild {
         float yaw, pitch;
         World world;
 
+        plc.clearData();
+        plc.inputData("player", executor.getName());
+        plc.inputData("home", name);
+
+        List<String> msg = new ArrayList<String>();
         try {
             x = getConfiguration().getDouble(path + ".x");
             y = getConfiguration().getDouble(path + ".y");
@@ -327,16 +354,17 @@ public class Guild {
             world = Bukkit.getWorld(getConfiguration().getString(path + ".world"));
             executor.teleport(new Location(world, x, y, z, yaw, pitch));
 
-            plc.inputData("player", executor.getName());
-            plc.inputData("home", name);
             plc.inputData("x", x + "");
             plc.inputData("y", y + "");
             plc.inputData("z", z + "");
             plc.inputData("world", world.getName());
             placeholder();
-            broadcast(plc.useAsList(Main.language.getMessages().get("guild.home")));
+            System.out.println(msg);
+            msg = Main.language.getMessages().get("guild.home");
+            broadcast(msg);
         }catch(Exception e){
-            Main.language.sendMessage(executor, plc.useAsList(Main.language.getMessages().get("alert.action-failed")));
+            msg = Main.language.getMessages().get("guild.home-not-found");
+            Main.language.sendMessage(executor, plc.useAsList(msg));
             e.printStackTrace();
         }
     }
@@ -348,13 +376,14 @@ public class Guild {
         if (delhome(name)){
             broadcast(Main.language.getMessages().get("guild.delhome"));
         }else{
-            Main.language.sendMessage(executor, plc.useAsList(Main.language.getMessages().get("alert.action-failed")));
+            Main.language.sendMessage(executor, plc.useAsList(Main.language.getMessages().get("guild.home-not-found")));
         }
     }
 
     public boolean delhome(String name){
         if (getHomeList().contains(name)){
             ConfigManager.input(getFile(), "homes." + name, null);
+            loadGuilds();
             return true;
         }
         return false;
@@ -367,6 +396,7 @@ public class Guild {
         ConfigManager.init(file, "info.point", 0);
         ConfigManager.init(file, "info.kills", 0);
         ConfigManager.init(file, "info.deaths", 0);
+        ConfigManager.init(file, "info.mobkill", 0);
         ConfigManager.init(file, "info.friendlyfire", false);
     }
 
@@ -426,6 +456,10 @@ public class Guild {
         return Integer.parseInt(ConfigManager.get(getFile(), "info.level").toString());
     }
 
+    public int getMobKill(){
+        return Integer.parseInt(ConfigManager.get(getFile(), "info.mobkill").toString());
+    }
+
     public boolean getFriendlyFire(){
         return this.friendlyfire;
     }
@@ -440,6 +474,10 @@ public class Guild {
 
     public Placeholder getPlaceholder(){
         return this.plc;
+    }
+
+    public Set<String> getHomes(){
+        return getConfiguration().getConfigurationSection("homes").getKeys(false);
     }
 
     public List<String> getPlayerInChat(){

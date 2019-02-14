@@ -2,6 +2,7 @@ name: ArdGuild
 version: 1.0
 author: TiveCS
 main: team.creativecode.ardguild.Main
+softdepend: [Vault]
 commands:
   ardguildchat:
       aliases: [gchat, guildc, agc, guildchat]

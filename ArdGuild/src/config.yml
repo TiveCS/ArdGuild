@@ -1,6 +1,9 @@
 language: 'en-US.yml'
 prefix: '&6&lAGuild &8&l>>'
+hook:
+  vault: true
 guild:
+  vault-require: 300
   max-name-length: 5
   max-member-per-level: 3
   max-home: 2

@@ -71,14 +71,30 @@ guild:
     - '&8[&a%guild%&8] &b%player% &ewas kicked by &6%kicker%'
   home:
     - '&8[&a%guild%&8] &b%player% &eteleported to home &a%home%'
+  home-not-found:
+    - '&8[&a%guild%&8] &eHome named &b%home% &eis not found!'
   sethome:
     - '&8[&a%guild%&8] &b%home% &ehome has been set!'
   delhome:
     - '&8[&a%guild%&8] &b%home% &chome has been deleted!!'
+  friendlyfire:
+    - '&8[&a%guild%&8] &eFriendly fire status is &6%friendlyfire%'
+  friendlyfire-hit-ally:
+    - '&8[&a%guild%&8] &eYou cannot hit your ally!'
+  point-add:
+    - '&8[&a%guild%&8] &a%point% &bPoint(s)'
 
 alert:
+  not-belong-to-guild:
+    - '%prefix% &cYou are not in any guild!'
+  vault-take:
+    - '%prefix% &c$%money% &ehas been taken'
+  vault-not-enough:
+    - '%prefix% &cLack of vault money! &8(&bmin. $%vault-money%&8)'
+  unpermitted-world:
+    - '%prefix% &cYou are in unpermitted world!'
   no-permission:
-    - '%prefix% &cInsufficient Permission!'
+    - '%prefix% &cLack of Permission!'
   not-found:
     - '%prefix% &cArgument not found!'
   action-failed:
